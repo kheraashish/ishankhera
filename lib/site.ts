@@ -12,12 +12,6 @@ export const youtube = {
   url: 'https://www.youtube.com/@IshanKhera',
 }
 
-/** The music video paired with the current latest release. Confirmed via YouTube oEmbed. */
-export const latestVideo = {
-  id: 'brKBjQtniGo',
-  title: 'Good Time Song - Music Video',
-}
-
 export const links = [
   { label: 'YouTube', href: youtube.url },
   { label: 'Apple Music', href: 'https://music.apple.com/artist/ishan-khera/1492263679' },

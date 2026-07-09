@@ -3,8 +3,10 @@ import Link from 'next/link'
 import { HeroStrip } from '@/components/HeroStrip'
 import { ReleaseCard } from '@/components/ReleaseCard'
 import { Reveal } from '@/components/Reveal'
+import { VideoPlayer } from '@/components/VideoPlayer'
 import { latest, releases } from '@/lib/discography'
-import { bio, latestVideo, links, publishedWorks, site } from '@/lib/site'
+import { bio, links, publishedWorks, site } from '@/lib/site'
+import { latestVideo, musicVideos } from '@/lib/videos'
 
 const RELEASE_DATE = new Intl.DateTimeFormat('en', {
   day: 'numeric',
@@ -65,7 +67,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Latest release: split media. */}
+      {/* Latest release: the newest record on the left, the rest of the rock videos beside it.
+          Every one of these is a 9:16 upload, so the players are vertical. */}
       <section id="latest" className="scroll-mt-16 border-t border-black/10 bg-mist">
         <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-8 sm:py-28">
           <Reveal>
@@ -75,32 +78,20 @@ export default function HomePage() {
           </Reveal>
 
           <Reveal delay={0.08}>
-            <div className="mt-10 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
-              <div className="relative aspect-video w-full overflow-hidden bg-plum">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${latestVideo.id}`}
-                  title={`${latest.title} music video`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full"
-                />
-              </div>
-
+            {/* Every column puts its title directly above its player, so the players
+                share a top edge. The featured one is wider, which is what marks it. */}
+            <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,360px)_1fr] lg:gap-16">
               <div>
-                <div className="relative aspect-square w-40 overflow-hidden bg-paper">
-                  <Image
-                    src={latest.art}
-                    alt={`Cover art for ${latest.title}`}
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                  />
-                </div>
-                <p className="mt-6 text-2xl font-medium tracking-tight text-ink sm:text-3xl">
+                <h3 className="mb-3 text-[15px] leading-snug font-semibold text-accent">
                   {latest.title}
-                </p>
-                <p className="mt-2 text-sm text-ink/55">
+                </h3>
+                <VideoPlayer
+                  id={latestVideo.id}
+                  title={latest.title}
+                  priority
+                  sizes="(max-width: 1024px) 80vw, 360px"
+                />
+                <p className="mt-4 text-sm text-ink/55">
                   {latest.genre}
                   <span className="px-2">/</span>
                   {RELEASE_DATE.format(new Date(latest.date))}
@@ -114,6 +105,23 @@ export default function HomePage() {
                   Listen on Apple Music
                 </a>
               </div>
+
+              {/* Three narrow 9:16 players squeeze to ~110px across on a phone, so they
+                  scroll horizontally there and settle into a grid from sm up. */}
+              <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:pb-0">
+                {musicVideos.map((video) => (
+                  <li key={video.id} className="w-[58%] shrink-0 snap-start sm:w-auto">
+                    <h3 className="mb-3 text-[15px] leading-snug font-medium text-ink">
+                      {video.title}
+                    </h3>
+                    <VideoPlayer
+                      id={video.id}
+                      title={video.title}
+                      sizes="(max-width: 640px) 58vw, (max-width: 1024px) 30vw, 22vw"
+                    />
+                  </li>
+                ))}
+              </ul>
             </div>
           </Reveal>
         </div>
