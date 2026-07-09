@@ -5,7 +5,10 @@ import { projectTypes } from '@/lib/site'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
-const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID
+// Web3Forms calls this a public key, like a form id, and it ships in the client bundle
+// by design. Rotate it from the dashboard if the form starts attracting spam.
+const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY
+const ENDPOINT = 'https://api.web3forms.com/submit'
 
 const field =
   'mt-2 w-full border border-ink/25 bg-paper px-4 py-3 text-ink placeholder:text-ink/40 transition-colors focus:border-accent focus:outline-none disabled:cursor-not-allowed disabled:bg-mist disabled:opacity-70'
@@ -35,21 +38,26 @@ export function ContactForm() {
 
     const form = event.currentTarget
     const data = new FormData(form)
+    data.set('access_key', WEB3FORMS_KEY as string)
     data.set('Music for', types.join(', '))
+    data.set('subject', `New enquiry from ${data.get('Name') || 'ishankhera.com'}`)
+    data.set('from_name', 'ishankhera.com')
 
     setStatus('submitting')
     setError(null)
 
     try {
-      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      const res = await fetch(ENDPOINT, {
         method: 'POST',
         headers: { Accept: 'application/json' },
         body: data,
       })
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => null)
-        throw new Error(body?.errors?.[0]?.message ?? 'That did not send. Please try again.')
+      // Web3Forms answers 200 with { success: false } on a rejected submission,
+      // so res.ok alone is not proof of delivery.
+      const body = await res.json().catch(() => null)
+      if (!res.ok || !body?.success) {
+        throw new Error(body?.message ?? 'That did not send. Please try again.')
       }
 
       setStatus('success')
@@ -81,7 +89,7 @@ export function ContactForm() {
 
   // Without an endpoint the form still renders, so the layout is reviewable, but every
   // control is inert. Never take an enquiry that has nowhere to go.
-  const configured = Boolean(FORMSPREE_ID)
+  const configured = Boolean(WEB3FORMS_KEY)
   const busy = status === 'submitting' || !configured
 
   return (
@@ -90,12 +98,22 @@ export function ContactForm() {
         <div className="border border-accent/30 bg-accent/5 p-6">
           <p className="font-medium text-ink">The form is not connected yet.</p>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">
-            Set <code className="bg-mist px-1.5 py-0.5">NEXT_PUBLIC_FORMSPREE_ID</code> to
+            Set <code className="bg-mist px-1.5 py-0.5">NEXT_PUBLIC_WEB3FORMS_KEY</code> to
             switch it on. Until then every control is disabled, so no enquiry is silently
             dropped.
           </p>
         </div>
       )}
+
+      {/* Web3Forms' honeypot. A bot fills every field it finds; a human never sees this. */}
+      <input
+        type="checkbox"
+        name="botcheck"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
 
       <div>
         <label htmlFor="name" className={label}>

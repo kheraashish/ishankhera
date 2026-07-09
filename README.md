@@ -16,18 +16,25 @@ npm run typecheck
 Copy `.env.example` to `.env.local` and fill both values. Neither is required for the site
 to build; each feature degrades on its own if the variable is absent.
 
-| Variable                   | Powers                              | Without it                                |
-| -------------------------- | ----------------------------------- | ----------------------------------------- |
-| `YOUTUBE_API_KEY`          | Live subscriber count on the badge  | Badge becomes a plain Subscribe link      |
-| `NEXT_PUBLIC_FORMSPREE_ID` | Contact form delivery               | Form renders disabled with a notice       |
+| Variable                    | Powers                             | Without it                           |
+| --------------------------- | ---------------------------------- | ------------------------------------ |
+| `YOUTUBE_API_KEY`           | Live subscriber count on the badge | Badge becomes a plain Subscribe link |
+| `NEXT_PUBLIC_WEB3FORMS_KEY` | Contact form delivery              | Form renders disabled with a notice  |
 
 `YOUTUBE_API_KEY` comes from a Google Cloud project with **YouTube Data API v3** enabled.
-The footer badge makes one `channels.list` call per hour, costing 1 of the 10,000 free
-daily quota units. Note that YouTube rounds subscriber counts to three significant figures
-for everyone, including its own widget, so the number is current rather than exact.
+It is read server-side only and never reaches the browser. The footer badge makes one
+`channels.list` call per hour, costing 1 of the 10,000 free daily quota units. Note that
+YouTube rounds subscriber counts to three significant figures for everyone, including its
+own official widget, so the number is current rather than exact.
 
-`NEXT_PUBLIC_FORMSPREE_ID` is the id from your Formspree endpoint URL,
-`https://formspree.io/f/<id>`. It is public by design; the endpoint only accepts posts.
+`NEXT_PUBLIC_WEB3FORMS_KEY` is the Form Access Key from the Web3Forms dashboard. Unlike the
+YouTube key it **is** public: `NEXT_PUBLIC_` inlines it into the client bundle, which is
+what Web3Forms intends, since the browser posts directly to their API. Submissions land in
+the inbox configured on that form. Rotate the key from the dashboard if spam appears; the
+form also carries Web3Forms' `botcheck` honeypot.
+
+Because it is inlined at build time, `NEXT_PUBLIC_WEB3FORMS_KEY` must be set in the hosting
+environment **before** the build runs, not just at runtime.
 
 ## Discography
 
