@@ -16,6 +16,8 @@ const RELEASE_DATE = new Intl.DateTimeFormat('en', {
 
 export default function HomePage() {
   const selected = releases.slice(0, 5)
+  // Good Time first, then the rest of the rock videos. All the same size.
+  const videos = [{ ...latestVideo, title: latest.title }, ...musicVideos]
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -72,57 +74,51 @@ export default function HomePage() {
       <section id="latest" className="scroll-mt-16 border-t border-black/10 bg-mist">
         <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-8 sm:py-28">
           <Reveal>
-            <h2 className="text-3xl font-light tracking-tight text-ink sm:text-5xl">
-              Latest release
-            </h2>
+            <h2 className="text-3xl font-light tracking-tight text-ink sm:text-5xl">Latest</h2>
           </Reveal>
 
           <Reveal delay={0.08}>
-            {/* Every column puts its title directly above its player, so the players
-                share a top edge. The featured one is wider, which is what marks it. */}
-            <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,360px)_1fr] lg:gap-16">
-              <div>
-                <h3 className="mb-3 text-[15px] leading-snug font-semibold text-accent">
-                  {latest.title}
-                </h3>
-                <VideoPlayer
-                  id={latestVideo.id}
-                  title={latest.title}
-                  priority
-                  sizes="(max-width: 1024px) 80vw, 360px"
-                />
-                <p className="mt-4 text-sm text-ink/55">
-                  {latest.genre}
-                  <span className="px-2">/</span>
-                  {RELEASE_DATE.format(new Date(latest.date))}
-                </p>
-                <a
-                  href={latest.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-6 inline-flex items-center rounded-full bg-plum px-6 py-3 text-sm font-semibold whitespace-nowrap text-paper transition-colors hover:bg-plum-raised active:translate-y-px"
-                >
-                  Listen on Apple Music
-                </a>
-              </div>
+            {/* Four players at one size. Good Time leads and is marked by the accent
+                heading and the release line beneath it, not by being bigger.
+                Four 9:16 players side by side would be ~85px across on a phone, so
+                they scroll horizontally there, pair up at sm, and go four-wide at lg. */}
+            <ul className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-8 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
+              {videos.map((video, i) => (
+                <li key={video.id} className="w-[58%] shrink-0 snap-start sm:w-auto">
+                  <h3
+                    className={`mb-3 text-[15px] leading-snug ${
+                      i === 0 ? 'font-semibold text-accent' : 'font-medium text-ink'
+                    }`}
+                  >
+                    {video.title}
+                  </h3>
+                  <VideoPlayer
+                    id={video.id}
+                    title={video.title}
+                    priority={i === 0}
+                    sizes="(max-width: 640px) 58vw, (max-width: 1024px) 45vw, 22vw"
+                  />
 
-              {/* Three narrow 9:16 players squeeze to ~110px across on a phone, so they
-                  scroll horizontally there and settle into a grid from sm up. */}
-              <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:gap-6 sm:overflow-visible sm:pb-0">
-                {musicVideos.map((video) => (
-                  <li key={video.id} className="w-[58%] shrink-0 snap-start sm:w-auto">
-                    <h3 className="mb-3 text-[15px] leading-snug font-medium text-ink">
-                      {video.title}
-                    </h3>
-                    <VideoPlayer
-                      id={video.id}
-                      title={video.title}
-                      sizes="(max-width: 640px) 58vw, (max-width: 1024px) 30vw, 22vw"
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  {i === 0 && (
+                    <>
+                      <p className="mt-4 text-sm text-ink/55">
+                        {latest.genre}
+                        <span className="px-2">/</span>
+                        {RELEASE_DATE.format(new Date(latest.date))}
+                      </p>
+                      <a
+                        href={latest.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-5 inline-flex items-center rounded-full bg-plum px-6 py-3 text-sm font-semibold whitespace-nowrap text-paper transition-colors hover:bg-plum-raised active:translate-y-px"
+                      >
+                        Listen on Apple Music
+                      </a>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
           </Reveal>
         </div>
       </section>
