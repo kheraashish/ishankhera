@@ -1,39 +1,15 @@
 import { youtube } from '@/lib/site'
-
-type Stats = { subscribers: number } | null
+import { compactCount, getChannelStats } from '@/lib/youtube'
 
 /**
- * Server-side subscriber count, cached for an hour.
+ * Footer subscribe badge. Shares getChannelStats with the hero SocialBar; Next dedupes
+ * the fetch, so the two together still cost one API call per revalidation.
  *
- * YouTube itself rounds subscriberCount to three significant figures, so this is
- * "current" rather than exact. Nobody, including YouTube's own widget, can show a
- * precise number. Without YOUTUBE_API_KEY set, this degrades to a plain link.
+ * No count-up animation here. The hero already does that, and a footer number that
+ * animates on scroll into view reads as a gimmick rather than a fact.
  */
-async function getStats(): Promise<Stats> {
-  const key = process.env.YOUTUBE_API_KEY
-  if (!key) return null
-
-  try {
-    const res = await fetch(
-      `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${youtube.channelId}&key=${key}`,
-      { next: { revalidate: 3600 } },
-    )
-    if (!res.ok) return null
-
-    const data = await res.json()
-    const raw = data?.items?.[0]?.statistics?.subscriberCount
-    const subscribers = Number(raw)
-    return Number.isFinite(subscribers) && subscribers > 0 ? { subscribers } : null
-  } catch {
-    // A dead stats endpoint must never take the page down with it.
-    return null
-  }
-}
-
-const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
-
 export async function YouTubeBadge({ tone = 'dark' }: { tone?: 'dark' | 'light' }) {
-  const stats = await getStats()
+  const stats = await getChannelStats()
   const onDark = tone === 'dark'
 
   return (
@@ -56,7 +32,7 @@ export async function YouTubeBadge({ tone = 'dark' }: { tone?: 'dark' | 'light' 
         Subscribe
         {stats ? (
           <span className={onDark ? 'ml-2 text-paper/60' : 'ml-2 text-ink/55'}>
-            {compact.format(stats.subscribers)}
+            {compactCount.format(stats.subscribers)}
           </span>
         ) : null}
       </span>

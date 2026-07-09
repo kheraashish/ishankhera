@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { HeroStrip } from '@/components/HeroStrip'
 import { ReleaseCard } from '@/components/ReleaseCard'
 import { Reveal } from '@/components/Reveal'
+import { SocialBar } from '@/components/SocialBar'
 import { VideoPlayer } from '@/components/VideoPlayer'
 import { latest, releases } from '@/lib/discography'
 import { bio, links, publishedWorks, site } from '@/lib/site'
@@ -39,27 +40,36 @@ export default function HomePage() {
       {/* Hero: a poster. Type up top, the band of figures standing on the baseline. */}
       <section className="flex min-h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-paper">
         <div className="mx-auto w-full max-w-[1400px] px-4 pt-12 sm:px-8 sm:pt-20">
-          <h1 className="max-w-4xl text-5xl leading-[0.95] font-light tracking-tighter text-ink sm:text-7xl lg:text-8xl">
-            Ishan Khera
-          </h1>
-          <p className="mt-6 max-w-lg text-base leading-relaxed text-ink/70 sm:text-lg">
-            Music for films, documentaries and songs. Original scores, classical
-            arrangements and rock records.
-          </p>
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
+            <div>
+              <h1 className="max-w-4xl text-5xl leading-[0.95] font-light tracking-tighter text-ink sm:text-7xl lg:text-8xl">
+                Ishan Khera
+              </h1>
+              <p className="mt-6 max-w-lg text-base leading-relaxed text-ink/70 sm:text-lg">
+                Music for films, documentaries and songs. Original scores, classical
+                arrangements and rock records.
+              </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href="/explore"
-              className="inline-flex items-center rounded-full bg-accent px-6 py-3 text-sm font-semibold whitespace-nowrap text-paper transition-colors hover:bg-accent-deep active:translate-y-px"
-            >
-              Explore music styles
-            </Link>
-            <a
-              href="#latest"
-              className="inline-flex items-center rounded-full border border-ink/20 px-6 py-3 text-sm font-semibold whitespace-nowrap text-ink transition-colors hover:border-ink/50 active:translate-y-px"
-            >
-              Hear the latest
-            </a>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/explore"
+                  className="inline-flex items-center rounded-full bg-accent px-6 py-3 text-sm font-semibold whitespace-nowrap text-paper transition-colors hover:bg-accent-deep active:translate-y-px"
+                >
+                  Explore music styles
+                </Link>
+                <a
+                  href="#latest"
+                  className="inline-flex items-center rounded-full border border-ink/20 px-6 py-3 text-sm font-semibold whitespace-nowrap text-ink transition-colors hover:border-ink/50 active:translate-y-px"
+                >
+                  Hear the latest
+                </a>
+              </div>
+            </div>
+
+            {/* Sits top right beside the name on desktop, drops under the CTAs on mobile. */}
+            <div className="lg:pt-4">
+              <SocialBar />
+            </div>
           </div>
         </div>
 
